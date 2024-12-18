@@ -18,7 +18,7 @@ def get_sentiment(text):
     else:
         return 'neutral'
 
-# Function to analyze the overall sentiment for Person A and Person B
+# Function to analyze sentiment for an entire conversation and track emotional flow
 def analyze_sentiment():
     # Get input from the text box
     conversation_text = conversation_entry.get("1.0", "end-1c")
@@ -31,20 +31,20 @@ def analyze_sentiment():
     # Split the conversation into turns based on speaker labels
     turns = split_conversation(conversation_text)
 
-    # Initialize sentiment trackers for each person
-    person_a_dialogue = ""
-    person_b_dialogue = ""
+    # Initialize dialogue storage for Person A and Person B
+    person_a_dialogue = []
+    person_b_dialogue = []
 
     # Separate the dialogue for Person A and Person B
     for turn in turns:
         if turn.startswith("Person A:"):
-            person_a_dialogue += " " + turn[8:].strip()  # remove "Person A:" label
+            person_a_dialogue.append(turn[8:].strip())  # remove "Person A:" label
         elif turn.startswith("Person B:"):
-            person_b_dialogue += " " + turn[8:].strip()  # remove "Person B:" label
+            person_b_dialogue.append(turn[8:].strip())  # remove "Person B:" label
 
     # Perform sentiment analysis on the entire dialogue of Person A and Person B
-    sentiment_a = get_sentiment(person_a_dialogue)
-    sentiment_b = get_sentiment(person_b_dialogue)
+    sentiment_a = get_sentiment(' '.join(person_a_dialogue))
+    sentiment_b = get_sentiment(' '.join(person_b_dialogue))
 
     # Map sentiment to emoji
     sentiment_map = {
@@ -57,36 +57,56 @@ def analyze_sentiment():
     result_a.config(text=f"Person A's Sentiment: {sentiment_map[sentiment_a]}")
     result_b.config(text=f"Person B's Sentiment: {sentiment_map[sentiment_b]}")
 
-    # Generate the summary of the sentiment analysis
-    summary_text = generate_summary(sentiment_a, sentiment_b)
+    # Generate the summary of the sentiment analysis based on emotional flow
+    summary_text = generate_summary(sentiment_a, sentiment_b, person_a_dialogue, person_b_dialogue)
     summary_label.config(text=summary_text)
 
 # Function to split conversation into turns by speaker (Person A and Person B)
 def split_conversation(conversation):
-    # Split conversation by new lines and remove extra spaces
-    turns = [turn.strip() for turn in conversation.splitlines() if turn.strip()]
-    return turns
+    # Normalize line breaks for consistency in input format
+    conversation = re.sub(r'\n+', '\n', conversation.strip())  # Replace multiple newlines with single newline
+    turns = re.split(r'(?=Person [A-B]:)', conversation)  # Split at "Person A:" or "Person B:" label
+    return [turn.strip() for turn in turns if turn.strip()]  # Remove extra spaces and empty lines
 
-# Function to generate the sentiment summary
-def generate_summary(sentiment_a, sentiment_b):
+# Function to generate the dynamic sentiment summary
+def generate_summary(sentiment_a, sentiment_b, conversation_a, conversation_b):
+    # Tracking emotional flow for Person A and Person B
+    sentiment_a_flow = []
+    sentiment_b_flow = []
+    
+    # Analyze sentence-by-sentence sentiment for Person A
+    for line in conversation_a:
+        sentiment_a_flow.append(get_sentiment(line))  # Track sentiment of each sentence
+    
+    # Analyze sentence-by-sentence sentiment for Person B
+    for line in conversation_b:
+        sentiment_b_flow.append(get_sentiment(line))  # Track sentiment of each sentence
+    
+    # Generating dynamic summaries based on flow
     # Summary for Person A
-    if sentiment_a == 'positive':
-        sentiment_a_text = "Person A is generally positive and encouraging, providing support and maintaining an optimistic tone throughout the conversation. 😊"
-    elif sentiment_a == 'negative':
-        sentiment_a_text = "Person A seems a bit down or frustrated, with a more negative tone. 😞"
-    else:
-        sentiment_a_text = "Person A is neutral, neither very positive nor negative. 😐"
-
+    sentiment_a_summary = []
+    if 'positive' in sentiment_a_flow:
+        sentiment_a_summary.append("Person A shows enthusiasm and support, encouraging Person B through most of the conversation.")
+    if 'negative' in sentiment_a_flow:
+        sentiment_a_summary.append("Person A also expresses concern at moments, trying to reassure Person B.")
+    if 'neutral' in sentiment_a_flow:
+        sentiment_a_summary.append("Person A remains neutral, helping to balance the conversation with calm responses.")
+    
+    sentiment_a_text = " ".join(sentiment_a_summary) or "Person A maintains a balanced tone throughout the conversation."
+    
     # Summary for Person B
-    if sentiment_b == 'positive':
-        sentiment_b_text = "Person B starts off stressed but becomes more positive as the conversation continues, particularly when discussing weekend plans. 😊"
-    elif sentiment_b == 'negative':
-        sentiment_b_text = "Person B is feeling overwhelmed and stressed, with a more negative tone. 😞"
-    else:
-        sentiment_b_text = "Person B is neutral throughout the conversation. 😐"
+    sentiment_b_summary = []
+    if 'positive' in sentiment_b_flow:
+        sentiment_b_summary.append("Person B gradually warms up to the idea of the surprise, showing excitement as the conversation progresses.")
+    if 'negative' in sentiment_b_flow:
+        sentiment_b_summary.append("At the beginning, Person B expresses anxiety and reluctance about the surprise, but their mood improves.")
+    if 'neutral' in sentiment_b_flow:
+        sentiment_b_summary.append("Person B's emotions fluctuate, but they eventually begin to feel more relaxed and open to the idea.")
+    
+    sentiment_b_text = " ".join(sentiment_b_summary) or "Person B's feelings shift from hesitation to excitement."
 
-    # Combine the summaries for both speakers
-    return f"{sentiment_a_text}\n\n{sentiment_b_text}"
+    # Combining summaries for both
+    return f"Summary of Person A's Sentiment: {sentiment_a_text}\n\nSummary of Person B's Sentiment: {sentiment_b_text}"
 
 # Create the main Tkinter window
 root = tk.Tk()
