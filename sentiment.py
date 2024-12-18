@@ -59,7 +59,10 @@ def analyze_sentiment():
 
     # Generate the summary of the sentiment analysis based on emotional flow
     summary_text = generate_summary(sentiment_a, sentiment_b, person_a_dialogue, person_b_dialogue)
-    summary_label.config(text=summary_text)
+    summary_label.config(state=tk.NORMAL)  # Allow editing
+    summary_label.delete(1.0, tk.END)  # Clear any previous text
+    summary_label.insert(tk.END, summary_text)  # Insert new text
+    summary_label.config(state=tk.DISABLED)  # Disable editing
 
 # Function to split conversation into turns by speaker (Person A and Person B)
 def split_conversation(conversation):
@@ -112,11 +115,15 @@ def generate_summary(sentiment_a, sentiment_b, conversation_a, conversation_b):
 root = tk.Tk()
 root.title("Conversation Sentiment Analysis")
 
+# Set the fixed window size
+root.geometry("600x500")
+root.resizable(False, False)  # Disable window resizing
+
 # Create label and text box for entering the conversation
 label_conversation = tk.Label(root, text="Enter the Conversation (with 'Person A:' and 'Person B:'):")
 label_conversation.pack(pady=5)
 
-conversation_entry = tk.Text(root, height=15, width=50)
+conversation_entry = tk.Text(root, height=10, width=50)
 conversation_entry.pack(pady=5)
 
 # Create the Apply button to trigger sentiment analysis
@@ -131,8 +138,9 @@ result_b = tk.Label(root, text="Person B's Sentiment: ", font=("Arial", 14))
 result_b.pack(pady=5)
 
 # Label to show the detailed sentiment summary
-summary_label = tk.Label(root, text="Sentiment Summary:", font=("Arial", 12))
+summary_label = tk.Text(root, height=8, width=60, wrap=tk.WORD, font=("Arial", 12))
 summary_label.pack(pady=10)
+summary_label.config(state=tk.DISABLED)  # Disable editing for the summary box
 
 # Start the Tkinter event loop
 root.mainloop()
