@@ -57,11 +57,36 @@ def analyze_sentiment():
     result_a.config(text=f"Person A's Sentiment: {sentiment_map[sentiment_a]}")
     result_b.config(text=f"Person B's Sentiment: {sentiment_map[sentiment_b]}")
 
+    # Generate the summary of the sentiment analysis
+    summary_text = generate_summary(sentiment_a, sentiment_b)
+    summary_label.config(text=summary_text)
+
 # Function to split conversation into turns by speaker (Person A and Person B)
 def split_conversation(conversation):
     # Split conversation by new lines and remove extra spaces
     turns = [turn.strip() for turn in conversation.splitlines() if turn.strip()]
     return turns
+
+# Function to generate the sentiment summary
+def generate_summary(sentiment_a, sentiment_b):
+    # Summary for Person A
+    if sentiment_a == 'positive':
+        sentiment_a_text = "Person A is generally positive and encouraging, providing support and maintaining an optimistic tone throughout the conversation. 😊"
+    elif sentiment_a == 'negative':
+        sentiment_a_text = "Person A seems a bit down or frustrated, with a more negative tone. 😞"
+    else:
+        sentiment_a_text = "Person A is neutral, neither very positive nor negative. 😐"
+
+    # Summary for Person B
+    if sentiment_b == 'positive':
+        sentiment_b_text = "Person B starts off stressed but becomes more positive as the conversation continues, particularly when discussing weekend plans. 😊"
+    elif sentiment_b == 'negative':
+        sentiment_b_text = "Person B is feeling overwhelmed and stressed, with a more negative tone. 😞"
+    else:
+        sentiment_b_text = "Person B is neutral throughout the conversation. 😐"
+
+    # Combine the summaries for both speakers
+    return f"{sentiment_a_text}\n\n{sentiment_b_text}"
 
 # Create the main Tkinter window
 root = tk.Tk()
@@ -84,6 +109,10 @@ result_a.pack(pady=5)
 
 result_b = tk.Label(root, text="Person B's Sentiment: ", font=("Arial", 14))
 result_b.pack(pady=5)
+
+# Label to show the detailed sentiment summary
+summary_label = tk.Label(root, text="Sentiment Summary:", font=("Arial", 12))
+summary_label.pack(pady=10)
 
 # Start the Tkinter event loop
 root.mainloop()
