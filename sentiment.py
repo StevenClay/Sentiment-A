@@ -106,7 +106,7 @@ def generate_summary(sentiment_a, sentiment_b, conversation_a, conversation_b):
     sentiment_b_text = " ".join(sentiment_b_summary) or "Person B's feelings shift from hesitation to excitement."
 
     # Combining summaries for both
-    return f"Summary of Person A's Sentiment: {sentiment_a_text}\n\nSummary of Person B's Sentiment: {sentiment_b_text}"
+    return f"Person A: {sentiment_a_text}\n\nPerson B: {sentiment_b_text}"
 
 # Create the main Tkinter window
 root = tk.Tk()
