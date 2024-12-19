@@ -4,8 +4,8 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 import re
 import nltk
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support, confusion_matrix, classification_report
-import numpy as np
 
+# Download necessary VADER lexicon from NLTK
 nltk.download('vader_lexicon')
 
 # Initialize the VADER sentiment analyzer
@@ -68,7 +68,7 @@ def analyze_sentiment():
     summary_label.config(state=tk.DISABLED)  # Disable editing
 
     # Evaluate the sentiment analysis
-    evaluate_sentiment_analysis([conversation_text], [sentiment_a])
+    evaluate_sentiment_analysis([conversation_text], [sentiment_a])  # Pass conversation text and predicted sentiment
 
 # Function to split conversation into turns by speaker (Person A and Person B)
 def split_conversation(conversation):
@@ -117,14 +117,13 @@ def generate_summary(sentiment_a, sentiment_b, conversation_a, conversation_b):
     # Combining summaries for both
     return f"Person A: {sentiment_a_text}\n\nPerson B: {sentiment_b_text}"
 
-# Function to evaluate the sentiment analysis based on the conversation and ground truth
+# Function to evaluate sentiment analysis performance
 def evaluate_sentiment_analysis(texts, ground_truth_labels):
     predicted_labels = []
     
     # Predict sentiment for each text using VADER
     for text in texts:
-        compound_score = sia.polarity_scores(text)['compound']
-        sentiment = get_sentiment(compound_score)
+        sentiment = get_sentiment(text)  # Now we pass the text to get_sentiment
         predicted_labels.append(sentiment)
     
     # Print the predicted and actual labels
@@ -148,17 +147,6 @@ def evaluate_sentiment_analysis(texts, ground_truth_labels):
     # Classification report (includes precision, recall, f1-score per class)
     print("\nClassification Report:")
     print(classification_report(ground_truth_labels, predicted_labels))
-
-# Sample dataset (replace this with your actual labeled data)
-# Each conversation has a corresponding ground truth sentiment label
-texts_for_evaluation = [
-    "Person A: I love this! Person B: It's okay, I guess.",
-    "Person A: I'm so angry at you! Person B: Why are you mad?",
-    "Person A: I don't know what to think. Person B: It's fine, don't worry."
-]
-
-# Ground truth sentiment labels for the above conversations
-ground_truth_labels = ['positive', 'negative', 'neutral']
 
 # Create the main Tkinter window
 root = tk.Tk()
